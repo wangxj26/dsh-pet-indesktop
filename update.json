@@ -1,16 +1,16 @@
 {
-  "version": "4.4.0",
-  "html_url": "https://github.com/wangxj26/dsh-pet-indesktop/releases/tag/v4.4.0",
-  "notes": "v4.4.0：在 MerZlin/dsh-pet-indesktop 基础上新增离线语音输入法——长按桌宠说话，松开即把语音转成带标点的文字并自动键入当前窗口。",
+  "version": "4.4.1",
+  "html_url": "https://github.com/wangxj26/dsh-pet-indesktop/releases/tag/v4.4.1",
+  "notes": "v4.4.1：设置页作者账号改为 fork 作者（GitHub @wangxj26），并新增「基于 MerZlin 的 dsh-pet-indesktop（MIT）二次开发」标注。",
   "assets": {
     "dsh-pet-standalone-webm-chat-setup.exe": {
       "fileName": "dsh-pet-standalone-webm-chat-setup.exe",
       "urls": [
-        "https://github.com/wangxj26/dsh-pet-indesktop/releases/download/v4.4.0/dsh-pet-standalone-webm-chat-setup.exe",
-        "https://gh-proxy.com/https://github.com/wangxj26/dsh-pet-indesktop/releases/download/v4.4.0/dsh-pet-standalone-webm-chat-setup.exe"
+        "https://github.com/wangxj26/dsh-pet-indesktop/releases/download/v4.4.1/dsh-pet-standalone-webm-chat-setup.exe",
+        "https://gh-proxy.com/https://github.com/wangxj26/dsh-pet-indesktop/releases/download/v4.4.1/dsh-pet-standalone-webm-chat-setup.exe"
       ],
-      "size": 677739753,
-      "sha256": "c5036590ea526d3772c317c8f70d01accd1effe3802704fa196343e79b6e2552",
+      "size": 705440737,
+      "sha256": "a515d0a3b9bbf44eb6b38fe3fe3eb23acce07c6affca8555845169f531c42a4e",
       "platform": "windows",
       "kind": "installer",
       "variant": "webm-chat"
