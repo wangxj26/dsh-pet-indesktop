@@ -41,10 +41,15 @@ AppName={#MyAppDisplay}
 AppVersion={#MyAppVersion}
 ; 本地定制：显式写入文件版本信息（默认 FileVersion 为空）
 VersionInfoVersion={#MyAppVersion}
-VersionInfoCompany=merzlin
+VersionInfoCompany=wangxj26
 VersionInfoProductName={#MyAppDisplay}
 VersionInfoDescription={#MyAppDisplay} Setup
-AppPublisher=merzlin
+AppPublisher=wangxj26
+AppPublisherURL=https://github.com/wangxj26/dsh-pet-indesktop
+AppSupportURL=https://github.com/wangxj26/dsh-pet-indesktop/issues
+AppUpdatesURL=https://github.com/wangxj26/dsh-pet-indesktop/releases
+; 版权：本 fork 的作者 + 上游 MIT 归属（ASCII，避免 .iss 编码问题）
+VersionInfoCopyright=Copyright (C) 2026 wangxj26. Based on MerZlin/dsh-pet-indesktop (MIT).
 ; 安装包图标（待机封面帧生成，scripts/make_icon.py）
 SetupIconFile=..\assets\icon.ico
 ; Per-user install, no admin needed; user may pick any drive in the wizard
