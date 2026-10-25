@@ -1,3 +1,11 @@
+> **本仓库是 fork 版本**
+>
+> 在 [**MerZlin/dsh-pet-indesktop**](https://github.com/MerZlin/dsh-pet-indesktop)（MIT License，Copyright (c) 2026 Merzlin）的基础上，
+> 新增了**离线语音输入法**：长按桌宠说话 → 本机 SenseVoice 识别 → 带标点的文字自动键入当前窗口。
+> 桌宠本体与素材来自原项目，版权归原作者；改动清单、构建方式与许可证说明见 [**FORK.md**](FORK.md)。
+
+---
+
 # dsh-pet-indesktop
 
 <p align="center">

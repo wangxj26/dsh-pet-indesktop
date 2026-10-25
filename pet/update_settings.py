@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (
 )
 
 from . import __version__, updater
-from .settings_about import build_author_section
+# 本地定制版：作者账号区块（settings_about.build_author_section）已按需求移除。
 
 
 class UpdatePage(QWidget):
@@ -45,7 +45,8 @@ class UpdatePage(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(16)
         intro = QLabel(
-            f"当前版本 v{__version__}。更新检查会优先使用 GitHub API，连接失败时自动切换到 CDN 镜像。",
+            f"当前版本 v{__version__}。更新功能已在本版本停用（本地定制版）："
+            "在线升级会覆盖本地新增的语音输入法等功能，故检查与下载均已写死禁用。",
             self,
         )
         intro.setWordWrap(True)
@@ -59,7 +60,7 @@ class UpdatePage(QWidget):
         status_layout.setSpacing(8)
         self.version_label = QLabel(f"当前版本  v{__version__}", status_card)
         self.version_label.setObjectName("updateCurrentVersion")
-        self.status_label = QLabel("尚未检查更新", status_card)
+        self.status_label = QLabel("更新功能已停用（本地定制版）", status_card)
         self.status_label.setObjectName("updateStatus")
         self.status_label.setWordWrap(True)
         status_layout.addWidget(self.version_label)
@@ -71,13 +72,14 @@ class UpdatePage(QWidget):
         self.check_button = QPushButton("检查更新", self)
         self.check_button.setObjectName("checkUpdateButton")
         self.check_button.clicked.connect(self.check_for_updates)
+        self.check_button.setEnabled(False)  # 本地定制版：写死停用
         self.install_button = QPushButton("下载并安装", self)
         self.install_button.setObjectName("installUpdateButton")
         self.install_button.setEnabled(False)
         self.install_button.clicked.connect(self.download_and_install)
         self.manual_button = QPushButton("打开下载页", self)
         self.manual_button.setObjectName("manualUpdateButton")
-        self.manual_button.setEnabled(False)
+        self.manual_button.setEnabled(False)  # 本地定制版：升级指向已清空
         self.manual_button.clicked.connect(self.open_download_page)
         action_row.addWidget(self.check_button)
         action_row.addWidget(self.install_button)
@@ -112,24 +114,12 @@ class UpdatePage(QWidget):
         notes_layout.addWidget(notes_title)
         notes_layout.addWidget(self.notes_label)
         layout.addWidget(notes_card)
-        layout.addWidget(build_author_section(self))
+        # 本地定制版：作者账号区块已按需求移除。
         layout.addStretch(1)
 
     def check_for_updates(self) -> None:
-        if self._busy:
-            return
-        self._busy = True
-        self._set_state("正在检查更新…", checking=True)
-
-        def worker() -> None:
-            try:
-                result = updater.latest_release()
-            except Exception as exc:  # noqa: BLE001
-                logging.exception("设置页检查更新失败")
-                result = exc
-            self.check_finished.emit(result)
-
-        threading.Thread(target=worker, daemon=True, name="pet-settings-update-check").start()
+        # 本地定制版：写死停用，不发起网络请求。
+        self._set_state("更新功能已停用（本地定制版）。", checking=False)
 
     def _on_check_finished(self, result) -> None:
         self._busy = False
@@ -162,32 +152,8 @@ class UpdatePage(QWidget):
         self._set_state(state, checking=False)
 
     def download_and_install(self) -> None:
-        if self._busy or self.release is None:
-            return
-        asset = updater.select_windows_installer(self.release, include_chat=self.include_chat)
-        if asset is None:
-            self._set_state("没有可用的 Windows 安装包，请打开下载页。", checking=False)
-            return
-        self._busy = True
-        self.check_button.setEnabled(False)
-        self.install_button.setEnabled(False)
-        self.progress.setValue(0)
-        self.progress.show()
-        self._set_state("正在下载更新…", checking=False)
-
-        def worker() -> None:
-            try:
-                path = updater.download_asset(
-                    asset,
-                    updater.update_cache_dir(self.config.dir),
-                    progress=lambda current, total: self.download_progress.emit(current, total or 0),
-                )
-                self.download_finished.emit(path)
-            except Exception as exc:  # noqa: BLE001
-                logging.exception("下载更新失败")
-                self.download_finished.emit(exc)
-
-        threading.Thread(target=worker, daemon=True, name="pet-settings-update-download").start()
+        # 本地定制版：写死停用。
+        self._set_state("更新功能已停用（本地定制版）。", checking=False)
 
     def _on_download_progress(self, current: int, total: int) -> None:
         if total > 0:

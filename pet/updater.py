@@ -24,14 +24,14 @@ from . import __version__
 
 APP_VERSION = __version__
 REPO = 'MerZlin/dsh-pet-indesktop'
-RELEASE_API = f'https://api.github.com/repos/{REPO}/releases/latest'
+# 本地定制版（新增语音输入法等功能）：更新功能**写死停用**——在线升级会把本地
+# 修改整体覆盖，故升级指向一律清空、检查一律返回"无更新"、安装包下载一律拒绝。
+# REPO_URL 保留：仅用于右键菜单「GitHub 项目页」打开项目主页，与升级无关。
+UPDATES_DISABLED = True
+RELEASE_API = ''
 REPO_URL = f'https://github.com/{REPO}'
-QUARK_PAN_URL = 'https://pan.quark.cn/s/68fc681ae486'
-_UPDATE_JSON_URLS = (
-    f'https://cdn.jsdelivr.net/gh/{REPO}@main/update.json',
-    f'https://fastly.jsdelivr.net/gh/{REPO}@main/update.json',
-    f'https://gcore.jsdelivr.net/gh/{REPO}@main/update.json',
-)
+QUARK_PAN_URL = ''
+_UPDATE_JSON_URLS = ()
 _USER_AGENT = 'dsh-pet-standalone-updater'
 _TRUSTED_ASSET_HOSTS = {
     'github.com',
@@ -160,7 +160,12 @@ def _release_from_payload(data: dict) -> dict | None:
 
 
 def latest_release(timeout: float = 5.0) -> dict | None:
-    """多源查询最新版本信息（GitHub API 优先，静态 CDN 兜底）。"""
+    """多源查询最新版本信息（GitHub API 优先，静态 CDN 兜底）。
+
+    本地定制版写死停用：不发起任何网络请求，调用方拿到 ``None`` 即"无更新"。
+    """
+    if UPDATES_DISABLED:
+        return None
     release = _fetch_json(RELEASE_API, timeout)
     if isinstance(release, dict) and release.get('tag_name'):
         assets, asset_details = _normalise_assets({
@@ -232,7 +237,12 @@ def download_asset(
     timeout: float = 30.0,
     progress: Callable[[int, int | None], None] | None = None,
 ) -> Path:
-    """下载并验证安装包；某个镜像失败会尝试下一个镜像。"""
+    """下载并验证安装包；某个镜像失败会尝试下一个镜像。
+
+    本地定制版写死停用：任何调用直接拒绝，绝不下载安装包。
+    """
+    if UPDATES_DISABLED:
+        raise RuntimeError('更新功能已停用（本地定制版），拒绝下载安装包')
     urls = list(asset.get('urls') or ([asset.get('url')] if asset.get('url') else []))
     expected_size = asset.get('size')
     expected_hash = str(asset.get('sha256') or '').lower() or None

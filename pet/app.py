@@ -52,6 +52,7 @@ from .desktop_notify import DesktopNotification, position_stack
 from .harness_launcher import launch_harness_gui
 from .library import MovieLibrary
 from .window import PetWindow
+from .voice_ime import VoiceIMEManager, install_voice_ime
 from .fun_image_popup import restore_ojingjing_windows
 from .runtime_cleanup import cleanup_stale_runtime_dirs
 from .session_watcher import install_session_watcher
@@ -684,6 +685,13 @@ class PetInstance:
         win.set_profile_identity(character_id, token() if callable(token) else None)
         win.shared_fullscreen_watcher_active = shared is not None
         self._wire_window(win)
+        # 语音输入法：长按大肥鱼唤起语音转文字（低侵入，事件过滤器挂在
+        # QApplication 上，不改动 window.py 内部交互状态机；任何异常都不
+        # 影响主流程）。
+        try:
+            install_voice_ime(win, self)
+        except Exception as exc:  # noqa: BLE001
+            logging.warning("语音输入法安装失败（已跳过，不影响桌宠）: %s", exc)
         # 文件投喂（拖文件模拟吃掉）：PR73 引入的接线在批5.2 重构时被丢，
         # 必须随每只窗的创建（启动/切角色/多窗）挂载，缺失则拖放无效。
         win.install_file_eater()
@@ -1110,6 +1118,42 @@ class PetInstance:
             self.modern_settings_dialog,
             before_present=self.modern_settings_dialog.move_away_from_pet,
         )
+
+    # ------------------------------------------------------------ 语音输入法
+    def _get_voice_ime_manager(self) -> VoiceIMEManager:
+        """惰性创建并保活每实例的语音输入法管理器。"""
+        mgr = getattr(self, "_voice_ime_manager", None)
+        if mgr is None:
+            mgr = VoiceIMEManager(self.config, self.shell)
+            self._voice_ime_manager = mgr
+        return mgr
+
+    def start_voice_ime(self) -> None:
+        """托盘「语音输入」：手动唤起（无需长按）。
+
+        抓取当前前台窗口（通常是用户正在编辑的窗口），开始聆听并识别。
+        """
+        mgr = self._get_voice_ime_manager()
+        try:
+            from .voice_ime_delivery import get_foreground_hwnd
+
+            mgr.start(get_foreground_hwnd(), pet_widget=self.win)
+        except Exception as exc:  # noqa: BLE001
+            logging.warning("手动启动语音输入失败: %s", exc)
+
+    def open_voice_ime_settings(self) -> None:
+        """托盘「语音输入法设置」：打开独立设置对话框。"""
+        try:
+            from .voice_ime_settings import VoiceIMESettingsDialog
+
+            dlg = getattr(self, "_voice_ime_settings_dialog", None)
+            if dlg is None:
+                dlg = VoiceIMESettingsDialog(self.config, self.win)
+                self._voice_ime_settings_dialog = dlg
+            dlg.show()
+            dlg.raise_()
+        except Exception as exc:  # noqa: BLE001
+            logging.warning("打开语音输入法设置失败: %s", exc)
 
     def _try_open_settings_process(self, initial_page: str | None = None) -> bool:
         """尝试走独立设置进程；True = 已交给独立进程（不要再开进程内对话框）。"""
@@ -4221,30 +4265,11 @@ class AppShell:
 
     # ------------------------------------------------------------ 更新
     def check_update(self, parent=None) -> None:
-        # 重入防护（审查 GLM-L3）：连点不应起多个检查线程/叠气泡
-        if getattr(self, "_update_checking", False):
-            return
-        self._update_checking = True
+        # 本地定制版：更新功能写死停用（防在线升级覆盖语音输入法等本地新增功能）。
+        # 托盘 / 右键菜单 / 窗口菜单的所有「检查更新」入口统一收口到这里。
         target = parent or (self.instance.win if self.instance is not None else None)
         if target is not None:
-            target.show_bubble("正在检查更新…", duration_ms=6000)
-        bridge = _UpdateBridge(target, owner=self)
-        self._update_bridge = bridge
-        # 完成后放行下一次检查（无论成败）
-        bridge.done.connect(lambda *_: setattr(self, "_update_checking", False))
-
-        def worker() -> None:
-            try:
-                release = updater.latest_release()
-            except Exception as exc:
-                # 后台线程异常必须收口回 GUI，否则更新提示永远停在
-                # 「正在检查更新」（审查 P1-01）
-                logging.debug("检查更新失败", exc_info=True)
-                bridge.done.emit(False, str(exc))  # 前缀由 _UpdateBridge._show 统一加
-                return
-            bridge.done.emit(bool(release), release or "无法连接更新服务，请稍后重试。")
-
-        threading.Thread(target=worker, daemon=True, name="pet-update-check").start()
+            target.show_bubble("更新功能已停用（本地定制版）", duration_ms=4000)
 
     # ------------------------------------------------------------ 生小肥鱼 / 多窗
     def spawn_pet(self) -> None:
@@ -4689,7 +4714,7 @@ class AppShell:
         tray.setContextMenu(menu)
         # 托盘提示同样说实话：默认的通用 tooltip 会让"桌面上什么都没有"看起来像
         # 悬停没反应，而不是"这只宠物当前没有捕获窗"。
-        tray.setToolTip("dsh-pet：没有可显示的桌宠（slot0 未活跃）")
+        tray.setToolTip("鱼语输入法：没有可显示的桌宠（slot0 未活跃）")
         tray.show()
         if not QSystemTrayIcon.isSystemTrayAvailable():
             from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton
@@ -4969,11 +4994,17 @@ class AppShell:
         position_stack(self._toast_windows)
 
     def _tray_placeholder_icon(self) -> QIcon:
-        """首帧还没解码时的托盘占位图标：复用既有矢量图标语言，不用新素材。
+        """托盘占位图标 = **大肥鱼应用 logo**（``assets/icon.ico``，与桌面快捷
+        方式同一张图）——本地定制：不再用爪印矢量图（用户实测托盘一直显示爪印）。
 
-        刻意不把桌宠窗口传进去取主题色——_build_tray 的调用方可能是非 QWidget
-        的替身窗口（测试），而托盘观感本来就该跟窗口 QSS 无关。
+        极端情况（图标文件缺失/损坏）回退旧爪印矢量图兜底。刻意不把桌宠窗口
+        传进去取主题色——托盘观感本来就该跟窗口 QSS 无关。
         """
+        from .application_icon import load_application_icon
+
+        icon = load_application_icon()
+        if not icon.isNull():
+            return icon
         return vector_menu_icon(QWidget(), "pet", 64)
 
     def _build_tray(self, win: PetWindow, tray: QSystemTrayIcon | None = None) -> QSystemTrayIcon:
@@ -4994,9 +5025,9 @@ class AppShell:
                 else None
             )
             if pending:
-                ready = getattr(win, "frame_ready", None)
-                if ready is not None:
-                    ready.connect(lambda: tray.setIcon(QIcon(win.icon_pixmap())))
+                # 本地定制：托盘固定用大肥鱼应用 logo（_tray_placeholder_icon
+                # 现在返回 assets/icon.ico），**不再**被角色动画帧覆盖。
+                pass
 
         def toggle_visible() -> None:
             if win.isVisible():
@@ -5063,6 +5094,9 @@ class AppShell:
             add_tray_action(menu, '快速对话（气泡）', self.instance.open_quick_chat)
             add_tray_action(menu, 'AI 设置', self.instance.open_chat_settings)
         add_tray_action(menu, '桌宠设置', self.instance.open_modern_settings)
+        # 语音输入法：手动唤起语音输入 / 打开设置（长按大肥鱼亦可触发）。
+        add_tray_action(menu, '语音输入', self.instance.start_voice_ime)
+        add_tray_action(menu, '语音输入法设置', self.instance.open_voice_ime_settings)
 
         m_char = track_menu(menu.addMenu('切换角色'))
         # 勾选态标**当前身份**的角色（换角色后本菜单会重建，见 _refresh_tray_menu）；
@@ -5148,7 +5182,7 @@ class AppShell:
         menu.addAction('退出', self.request_app_quit)
 
         tray.setContextMenu(menu)
-        tray.setToolTip('dsh-pet 独立桌宠')
+        tray.setToolTip("鱼语输入法")
         tray.show()
         # F5：菜单已由新菜单接管后，显式记录所有权并释放被替换的旧菜单
         #（owner 生命周期：强引用保活到替换，旧菜单延迟销毁防泄漏）。
@@ -5295,7 +5329,7 @@ def main(argv: list[str] | None = None, enable_chat: bool = True) -> int:
             controller.start()
         except Exception as exc:
             logging.exception("启动失败")
-            _show_startup_error("dsh-pet-standalone", str(exc))
+            _show_startup_error("鱼语输入法", str(exc))
             return 1
 
         logging.info("进入事件循环")

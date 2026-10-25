@@ -39,6 +39,11 @@
 AppId={#MyAppId}
 AppName={#MyAppDisplay}
 AppVersion={#MyAppVersion}
+; 本地定制：显式写入文件版本信息（默认 FileVersion 为空）
+VersionInfoVersion={#MyAppVersion}
+VersionInfoCompany=merzlin
+VersionInfoProductName={#MyAppDisplay}
+VersionInfoDescription={#MyAppDisplay} Setup
 AppPublisher=merzlin
 ; 安装包图标（待机封面帧生成，scripts/make_icon.py）
 SetupIconFile=..\assets\icon.ico

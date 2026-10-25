@@ -1445,7 +1445,7 @@ class OverlayShell(QObject):
         tray = getattr(self, "tray", None)
         if tray is not None:
             try:
-                tray.setToolTip(f"dsh-pet：没有可显示的桌宠（{reason}）")
+                tray.setToolTip(f"鱼语输入法：没有可显示的桌宠（{reason}）")
             except RuntimeError:
                 pass
 
@@ -1520,6 +1520,15 @@ class OverlayShell(QObject):
         self._wire_host_overlay(host, host.overlay)
         self._connect_host_screen(host)
         self._bind_feeding(host)
+        # 语音输入法（长按鱼 → 语音转文字）：overlay 拓扑下 PetWindow 不构造，
+        # 挂钩必须落在 overlay 窗上（应用级事件过滤器，只认本窗鼠标事件，
+        # 不改 overlay 的点击/拖拽状态机）。任何异常都不影响桌宠本体。
+        try:
+            from .voice_ime import install_voice_ime
+
+            install_voice_ime(host.overlay, self._instance)
+        except Exception as exc:  # noqa: BLE001
+            logging.warning("语音输入法安装失败（overlay，已跳过）: %s", exc)
 
     def _wire_host_overlay(self, host, overlay) -> None:
         """把壳层的窗口回调挂到该宿主的 overlay 上（新建与换屏共用一份清单）。"""
@@ -4286,7 +4295,7 @@ class OverlayShell(QObject):
             lambda reason: self._toggle_pet_visible()
             if reason == QSystemTrayIcon.ActivationReason.DoubleClick
             else None)
-        tray.setToolTip("dsh-pet (overlay)")
+        tray.setToolTip("鱼语输入法")
         # 菜单本体强引用保活（app.py F5 教训：PySide6 wrapper 回收后
         # contextMenu 会命中失效 wrapper）
         self.tray = tray
@@ -4440,6 +4449,13 @@ class OverlayShell(QObject):
                         else ("生成 / 恢复 slot0" if self.sprite is None else "生小肥鱼"),
                         self.spawn_pet)
         add_tray_action(menu, "退出子肥鱼", self.clear_spawned_pets)
+        # 语音输入法：手动唤起 / 设置（长按鱼身亦可触发，见 _wire_host）。
+        # 经 _instance（主 PetInstance）取方法；测试桩缺方法时整组不出现。
+        _voice_instance = getattr(self, "_instance", None)
+        if _voice_instance is not None and hasattr(_voice_instance, "start_voice_ime"):
+            add_tray_action(menu, "语音输入", _voice_instance.start_voice_ime)
+            add_tray_action(menu, "语音输入法设置",
+                            _voice_instance.open_voice_ime_settings)
         # tooltip 默认不显示（QMenu 的默认值），而这条关闭入口的 tooltip 正是
         # "档案还在、怎么弄回来"的说明，必须能看见。
         menu.setToolTipsVisible(True)
@@ -4603,7 +4619,15 @@ class OverlayShell(QObject):
         return vector_menu_icon(QWidget(), "pet", 64)
 
     def _tray_icon(self):
-        """托盘图标取鱼本体当前帧（idle 首帧兜底）；取不到回退爪印占位图标。"""
+        """托盘图标固定用**大肥鱼应用 logo**（``assets/icon.ico``，与桌面快捷
+        方式同一张图）——本地定制：不再取动画帧（帧链路取不到时会回退爪印
+        占位图，用户实测托盘一直显示爪印），也不再随动画帧刷新。"""
+        from .application_icon import load_application_icon
+
+        icon = load_application_icon()
+        if not icon.isNull():
+            return icon
+        # 极端情况（图标文件缺失/损坏）：保留旧占位链兜底。
         pm = self.icon_pixmap(64)
         if pm is not None:
             return QIcon(pm)
@@ -4652,11 +4676,11 @@ class OverlayShell(QObject):
             timer.stop()
 
     def _refresh_tray_icon_once(self) -> bool:
-        """能拿到角色帧就把托盘图标换成它；返回是否已换（拿到帧）。"""
-        pm = self.icon_pixmap(64)
-        if pm is None or self.tray is None:
-            return False
-        self.tray.setIcon(QIcon(pm))
+        """本地定制：托盘固定用大肥鱼应用 logo，**不再**被角色动画帧覆盖。
+
+        返回 True 让刷新机器（``_arm_tray_icon_refresh`` 的 500ms 轮询）在
+        第一次探测时就收手，不启动定时器。
+        """
         return True
 
     # ---------------------------------------------------------------- 图标面

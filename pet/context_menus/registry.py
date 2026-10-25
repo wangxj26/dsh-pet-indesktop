@@ -278,11 +278,13 @@ def _build_github(menu, _pet):
 
 
 def _build_quark(menu, _pet):
+    url = QUARK_PAN_URL
+    # 本地定制版：升级指向已清空（QUARK_PAN_URL=''），入口保留但点击为空操作。
     return add_action(
         menu,
         "夸克网盘下载",
         "download",
-        lambda: QDesktopServices.openUrl(QUrl(QUARK_PAN_URL)),
+        (lambda: QDesktopServices.openUrl(QUrl(url))) if url else (lambda: None),
         close_on_trigger=True,
     )
 

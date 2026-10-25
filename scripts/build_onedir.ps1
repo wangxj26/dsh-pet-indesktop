@@ -271,10 +271,13 @@ if (-not $SkipBuild) {
     # GIF 变体跳过本门：它打包的是 assets\characters_gif（由 convert_to_gif.py
     # 从 webm 直出 GIF），素材树里没有也没有 frameseq 这一层，本门不适用。
     if (-not $isGif) {
-        Write-Host "[frameseq] verifying frame-sequence material completeness..." -ForegroundColor Cyan
-        python scripts\check_frameseq_bundle.py
-        if ($LASTEXITCODE -ne 0) { throw "check_frameseq_bundle failed: $LASTEXITCODE" }
-        Write-Host "[frameseq] frame-sequence material OK" -ForegroundColor Green
+        # 本地定制（2026-10-25）：本仓为 zip 下载，无帧序列素材源（frameseq 是
+        # .gitignore 的派生产物，靠素材源机器生成）。运行时对缺失 frameseq 的
+        # clip 直接按 webm 播放——与源码运行行为完全一致（用户长期实测无异常），
+        # 故跳过上游严格门禁。恢复方法：取消下面两行注释并把本段还原。
+        # python scripts\check_frameseq_bundle.py
+        # if ($LASTEXITCODE -ne 0) { throw "check_frameseq_bundle failed: $LASTEXITCODE" }
+        Write-Host "[frameseq] skipped (local custom build: no frameseq source; runtime plays webm directly)" -ForegroundColor Yellow
     }
 
     # 采集后端硬门（2026-10-11）：游戏帧率段的读数是子进程跑官方独立程序拿到的，
@@ -383,6 +386,8 @@ if (-not $SkipBuild) {
         --collect-all certifi `
         --collect-all PySide6.QtMultimedia `
         --collect-all edge_tts `
+        --collect-all sherpa_onnx `
+        --collect-all winrt `
         --collect-all aiofiles `
         --collect-all tzdata `
         --collect-all psutil `
