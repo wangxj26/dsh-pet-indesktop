@@ -63,8 +63,7 @@ def test_author_section_sits_on_the_updates_page(tmp_path, monkeypatch, include_
         app.processEvents()
         page = dialog.pages.currentWidget()
         before = copy.deepcopy(cfg.data)
-        for platform, handle in [("BiliBili", "@張墨林"), ("BiliBili", "@快乐小咸鱼a"),
-                                 ("抖音", "@Eager"), ("GitHub", "@MerZlin")]:
+        for platform, handle in [("GitHub", "@wangxj26")]:
             assert any(label.text() == handle for label in page.findChildren(QLabel))
             button = next(button for button in page.findChildren(QPushButton)
                           if button.accessibleName() == f"复制 {platform} 账号 {handle}")
@@ -73,7 +72,11 @@ def test_author_section_sits_on_the_updates_page(tmp_path, monkeypatch, include_
         link = next(button for button in page.findChildren(QPushButton)
                     if button.accessibleName() == "打开 GitHub 主页")
         QTest.mouseClick(link, Qt.MouseButton.LeftButton)
-        assert opened == ["https://github.com/MerZlin"]
+        assert opened == ["https://github.com/wangxj26"]
+        # 上游来源标注必须在：桌宠本体来自 MerZlin（MIT），链接指向原项目。
+        notes = [label.text() for label in page.findChildren(QLabel)]
+        assert any("MerZlin" in text and "MIT" in text for text in notes), \
+            "「基于 MerZlin 二次开发」标注缺失"
         assert cfg.data == before
     finally:
         app.clipboard().setText(previous_clipboard)

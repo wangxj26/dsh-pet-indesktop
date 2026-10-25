@@ -593,7 +593,7 @@ def test_ctrl_f_focuses_the_search_box(tmp_path, monkeypatch):
 
 
 def test_author_rows_are_searchable_and_jump_to_the_update_page(tmp_path, monkeypatch):
-    """「更新」页的作者账号行也进搜索索引：搜 BiliBili / 抖音 能跳过去。
+    """「更新」页的作者账号行也进搜索索引：搜平台名 / 账号名能跳过去。
 
     它们不是 SettingRow（没有配置键），但按同形暴露 label/hint_label，所以同一套
     匹配函数就能覆盖——不必为"可搜"改掉那一块的排版。
@@ -606,14 +606,14 @@ def test_author_rows_are_searchable_and_jump_to_the_update_page(tmp_path, monkey
         rows = dialog._search_rows
         assert any(isinstance(row, AuthorRow) for row in rows), "作者行必须进索引"
 
-        matches = settings_search.find_matches(rows, "bilibili")
-        assert matches, "搜平台名要有命中"
+        matches = settings_search.find_matches(rows, "authorrow")
+        assert matches, "搜作者行的 objectName 要有命中"
         assert all(isinstance(row, AuthorRow) for row in matches)
 
-        handles = settings_search.find_matches(rows, "快乐小咸鱼")
+        handles = settings_search.find_matches(rows, "wangxj26")
         assert handles, "搜账号名也要有命中"
 
-        dialog._search_settings("bilibili")
+        dialog._search_settings("wangxj26")
         page = dialog.pages.currentWidget()
         assert page is not None and page.isAncestorOf(matches[0]), (
             "命中项在「更新」页，翻页要跳过去")

@@ -12,12 +12,16 @@ from .context_menus.icons import vector_widget_icon
 from .settings_widgets import SettingsSection
 
 AUTHOR_ACCOUNTS = (
-    ("BiliBili", "@張墨林"),
-    ("BiliBili", "@快乐小咸鱼a"),
-    ("抖音", "@Eager"),
-    ("GitHub", "@MerZlin"),
+    ("GitHub", "@wangxj26"),
 )
-GITHUB_PROFILE = "https://github.com/MerZlin"
+GITHUB_PROFILE = "https://github.com/wangxj26"
+
+# 二次开发来源标注（作者账号行下方；链接指向本 fork 的上游原项目，MIT 许可）。
+# 口径与官网「开源与致谢」一致：桌宠本体来自 MerZlin，本版本新增语音输入法。
+UPSTREAM_NOTE_HTML = (
+    '基于 <a href="https://github.com/MerZlin/dsh-pet-indesktop">'
+    'MerZlin 的 dsh-pet-indesktop ↗</a>（MIT）二次开发'
+)
 
 
 def build_author_section(parent: QWidget | None = None) -> SettingsSection:
@@ -29,7 +33,27 @@ def build_author_section(parent: QWidget | None = None) -> SettingsSection:
     分区不写入 Config，也不参与重置写回。
     """
     rows = [_account_row(platform, handle) for platform, handle in AUTHOR_ACCOUNTS]
+    rows.append(_upstream_note_row())
     return SettingsSection("作者账号", rows, parent)
+
+
+def _upstream_note_row() -> QLabel:
+    """上游来源标注行：只读、链接可点，随主题走「settingHint」的次要墨色。
+
+    刻意不做成 ``AuthorRow``：没有账号可复制、也没有要进搜索索引的键值对
+    （搜索索引只收 ``SettingRow`` / ``AuthorRow``，见 ``modern_settings_dialog``
+    末尾的收集逻辑），普通标签就够。
+    """
+    note = QLabel(UPSTREAM_NOTE_HTML)
+    note.setObjectName("settingHint")
+    note.setContentsMargins(16, 2, 16, 10)
+    note.setWordWrap(True)
+    note.setOpenExternalLinks(True)
+    note.setTextInteractionFlags(
+        Qt.TextInteractionFlag.TextBrowserInteraction
+        | Qt.TextInteractionFlag.TextSelectableByMouse)
+    note.setFocusPolicy(Qt.FocusPolicy.ClickFocus)
+    return note
 
 
 class AuthorRow(QWidget):
