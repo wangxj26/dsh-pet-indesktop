@@ -1,95 +1,19 @@
 {
   "version": "4.4.0",
-  "html_url": "https://github.com/MerZlin/dsh-pet-indesktop/releases/tag/v4.4.0",
-  "notes": "v4.4.0（试验先行版）发布说明见仓库 docs/RELEASE-v4.4.0.md",
+  "html_url": "https://github.com/wangxj26/dsh-pet-indesktop/releases/tag/v4.4.0",
+  "notes": "v4.4.0：在 MerZlin/dsh-pet-indesktop 基础上新增离线语音输入法——长按桌宠说话，松开即把语音转成带标点的文字并自动键入当前窗口。",
   "assets": {
-    "dsh-pet-standalone-webm-chat-linux-x86_64.zip": {
-      "fileName": "dsh-pet-standalone-webm-chat-linux-x86_64.zip",
-      "urls": [
-        "https://github.com/MerZlin/dsh-pet-indesktop/releases/download/untagged-59a22cf724e7fe2709bb/dsh-pet-standalone-webm-chat-linux-x86_64.zip"
-      ],
-      "size": 544621320,
-      "sha256": "9439b15be3efa032e47eff55bb03d852f0c8ee0824db2c49d2bb6c21d018eb39",
-      "platform": "",
-      "kind": "",
-      "variant": ""
-    },
-    "dsh-pet-standalone-webm-chat-macos-arm64.zip": {
-      "fileName": "dsh-pet-standalone-webm-chat-macos-arm64.zip",
-      "urls": [
-        "https://github.com/MerZlin/dsh-pet-indesktop/releases/download/untagged-59a22cf724e7fe2709bb/dsh-pet-standalone-webm-chat-macos-arm64.zip"
-      ],
-      "size": 376123996,
-      "sha256": "ed18a63938bae5c26be7badb19851f52787090039c8b32474fd50509934ce4e8",
-      "platform": "",
-      "kind": "",
-      "variant": ""
-    },
-    "dsh-pet-standalone-webm-chat-portable.zip": {
-      "fileName": "dsh-pet-standalone-webm-chat-portable.zip",
-      "urls": [
-        "https://github.com/MerZlin/dsh-pet-indesktop/releases/download/untagged-59a22cf724e7fe2709bb/dsh-pet-standalone-webm-chat-portable.zip"
-      ],
-      "size": 349295546,
-      "sha256": "3f31b8c9454702d114e539324137347ad3a0c7c264d8071e29b250becdc59ea6",
-      "platform": "",
-      "kind": "",
-      "variant": ""
-    },
     "dsh-pet-standalone-webm-chat-setup.exe": {
       "fileName": "dsh-pet-standalone-webm-chat-setup.exe",
       "urls": [
-        "https://github.com/MerZlin/dsh-pet-indesktop/releases/download/untagged-59a22cf724e7fe2709bb/dsh-pet-standalone-webm-chat-setup.exe"
+        "https://github.com/wangxj26/dsh-pet-indesktop/releases/download/v4.4.0/dsh-pet-standalone-webm-chat-setup.exe",
+        "https://gh-proxy.com/https://github.com/wangxj26/dsh-pet-indesktop/releases/download/v4.4.0/dsh-pet-standalone-webm-chat-setup.exe"
       ],
-      "size": 296489700,
-      "sha256": "91d887482b9ef0dc9d93d1dfe01a042002040712afc28b06c6dfd3f1b805b576",
-      "platform": "",
-      "kind": "",
-      "variant": ""
-    },
-    "dsh-pet-standalone-webm-linux-x86_64.zip": {
-      "fileName": "dsh-pet-standalone-webm-linux-x86_64.zip",
-      "urls": [
-        "https://github.com/MerZlin/dsh-pet-indesktop/releases/download/untagged-59a22cf724e7fe2709bb/dsh-pet-standalone-webm-linux-x86_64.zip"
-      ],
-      "size": 544256845,
-      "sha256": "f50eb6c842be05db5f0f3807d939fae1934ebc7ba9fd033a8693ae4e2ffb7509",
-      "platform": "",
-      "kind": "",
-      "variant": ""
-    },
-    "dsh-pet-standalone-webm-macos-arm64.zip": {
-      "fileName": "dsh-pet-standalone-webm-macos-arm64.zip",
-      "urls": [
-        "https://github.com/MerZlin/dsh-pet-indesktop/releases/download/untagged-59a22cf724e7fe2709bb/dsh-pet-standalone-webm-macos-arm64.zip"
-      ],
-      "size": 375755066,
-      "sha256": "4bae3b756e2bc3d83f711b2e7c6cd9f4d0380d0425d1f4eb6340ae82a9ed362b",
-      "platform": "",
-      "kind": "",
-      "variant": ""
-    },
-    "dsh-pet-standalone-webm-portable.zip": {
-      "fileName": "dsh-pet-standalone-webm-portable.zip",
-      "urls": [
-        "https://github.com/MerZlin/dsh-pet-indesktop/releases/download/untagged-59a22cf724e7fe2709bb/dsh-pet-standalone-webm-portable.zip"
-      ],
-      "size": 348968895,
-      "sha256": "fa049e31f1b0d184f77639a749f239b55b48c64b2ba14b59d08b3897168b55aa",
-      "platform": "",
-      "kind": "",
-      "variant": ""
-    },
-    "dsh-pet-standalone-webm-setup.exe": {
-      "fileName": "dsh-pet-standalone-webm-setup.exe",
-      "urls": [
-        "https://github.com/MerZlin/dsh-pet-indesktop/releases/download/untagged-59a22cf724e7fe2709bb/dsh-pet-standalone-webm-setup.exe"
-      ],
-      "size": 296164918,
-      "sha256": "6e9d284ce544d98bfb6917583617190dac4f9f0301a5f75dbbc1782a48850be6",
-      "platform": "",
-      "kind": "",
-      "variant": ""
+      "size": 677739753,
+      "sha256": "c5036590ea526d3772c317c8f70d01accd1effe3802704fa196343e79b6e2552",
+      "platform": "windows",
+      "kind": "installer",
+      "variant": "webm-chat"
     }
   }
 }
